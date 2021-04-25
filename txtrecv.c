@@ -213,13 +213,19 @@ cTxtStatus::~cTxtStatus()
 
 void cTxtStatus::ChannelSwitch(const cDevice *Device, int ChannelNumber, bool LiveView)
 {
+   DEBUG_OT_TXTRCVC("called with DVB %d channel %d LiveView=%s\n", Device->DeviceNumber(), ChannelNumber, BOOLTOTEXT(LiveView));
    // Disconnect receiver if channel is 0, will reconnect to new
    // receiver after channel change.
-   if (LiveView && ChannelNumber == 0)
+   if (LiveView && ChannelNumber == 0) {
+      DEBUG_OT_TXTRCVC("ChannelNumber==0 and LiveView==true -> stop receiver\n");
       DELETENULL(receiver);
+   };
 
    // ignore if channel is 0
-   if (ChannelNumber == 0) return;
+   if (ChannelNumber == 0) {
+      DEBUG_OT_TXTRCVC("channel==0 -> nothing more todo\n");
+      return;
+   };
 
    // ignore if channel is invalid (highly unlikely, this will ever
    // be the case, but defensive coding rules!)
@@ -229,14 +235,21 @@ void cTxtStatus::ChannelSwitch(const cDevice *Device, int ChannelNumber, bool Li
 #else
    const cChannel* newLiveChannel = Channels.GetByNumber(ChannelNumber);
 #endif
-   if (newLiveChannel == NULL) return;
+   if (newLiveChannel == NULL) {
+      DEBUG_OT_TXTRCVC("found no channel for ChannelNumber=%d -> no further action possible\n", ChannelNumber);
+      return;
+   };
 
    // ignore non-live-channel-switching
-   if (!LiveView || ChannelNumber != cDevice::CurrentChannel()) return;
+   if (!LiveView || ChannelNumber != cDevice::CurrentChannel()) {
+      DEBUG_OT_TXTRCVC("LiveView!=true (%s) or ChannelNumber(%d)!=<current>(%d) -> no further action possible\n", BOOLTOTEXT(LiveView), ChannelNumber, cDevice::CurrentChannel());
+      return;
+   };
 
    // live channel was changed
    // now re-attach the receiver to the new live channel
 
+   DEBUG_OT_TXTRCVC("stop receiver\n");
    DELETENULL(receiver);
 
    int TPid = newLiveChannel->Tpid();
@@ -244,6 +257,7 @@ void cTxtStatus::ChannelSwitch(const cDevice *Device, int ChannelNumber, bool Li
    if (TPid) {
       receiver = new cTxtReceiver(newLiveChannel, storeTopText, storage);
       cDevice::ActualDevice()->AttachReceiver(receiver);
+      DEBUG_OT_TXTRCVC("live channel switch detected, start new receiver on DVB %d for channel %d LiveView=%s\n", cDevice::ActualDevice()->DeviceNumber(), newLiveChannel->Number(), BOOLTOTEXT(LiveView));
    }
 
    TeletextBrowser::ChannelSwitched(ChannelNumber, true);
