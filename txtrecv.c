@@ -249,8 +249,11 @@ void cTxtStatus::ChannelSwitch(const cDevice *Device, int ChannelNumber, bool Li
    // live channel was changed
    // now re-attach the receiver to the new live channel
 
-   DEBUG_OT_TXTRCVC("stop receiver\n");
-   DELETENULL(receiver);
+   if (receiver) {
+      // only stop receiver if still running
+      DEBUG_OT_TXTRCVC("stop still running receiver\n");
+      DELETENULL(receiver);
+   };
 
    int TPid = newLiveChannel->Tpid();
 
