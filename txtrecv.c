@@ -236,13 +236,13 @@ void cTxtStatus::ChannelSwitch(const cDevice *Device, int ChannelNumber, bool Li
    const cChannel* newLiveChannel = Channels.GetByNumber(ChannelNumber);
 #endif
    if (newLiveChannel == NULL) {
-      DEBUG_OT_TXTRCVC("found no channel for ChannelNumber=%d -> no further action possible\n", ChannelNumber);
+      DEBUG_OT_TXTRCVC("found no channel for ChannelNumber=%d -> nothing more todo\n", ChannelNumber);
       return;
    };
 
    // ignore non-live-channel-switching
    if (!LiveView || ChannelNumber != cDevice::CurrentChannel()) {
-      DEBUG_OT_TXTRCVC("LiveView!=true (%s) or ChannelNumber(%d)!=<current>(%d) -> no further action possible\n", BOOLTOTEXT(LiveView), ChannelNumber, cDevice::CurrentChannel());
+      DEBUG_OT_TXTRCVC("LiveView!=true (%s) or ChannelNumber(%d)!=<current>(%d) -> nothing more todo\n", BOOLTOTEXT(LiveView), ChannelNumber, cDevice::CurrentChannel());
       return;
    };
 
